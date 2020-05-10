@@ -1,0 +1,31 @@
+- import_playbook: vars.yml
+
+- name: shpl 
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+
+  - name: get AWS credentials
+    command: "aws2 ecr get-login-password --region us-west-2"
+    register: aws_login
+
+
+  - name: Login docker
+    command: "docker login --username AWS --password-stdin {{ ECRDockerImageName }}"
+    args:
+      stdin: '{{ aws_login.stdout }}'
+
+  - name: build bff image to ECR
+    docker_image:
+      name: '{{ DockerImageName }}'
+      build: 
+        path: ./dockerfile
+
+  - name: tag image
+    command: "docker tag {{ DockerImageName }}:latest {{ ECRDockerImageName }}:latest"
+
+  - name: push image
+    command: "docker push {{ ECRDockerImageName }}:latest"
+    
+  

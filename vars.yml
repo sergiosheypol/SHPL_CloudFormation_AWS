@@ -1,0 +1,16 @@
+- name: set variables
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+
+  - set_fact:
+      Project: SHPL
+      Module: BFF
+      Env: PROD
+      VpcId: ## Fill in
+      SubnetId1: ## Fill in
+      SubnetId2: ## Fill in
+      ECRIamExecutionRole: ## Fill in
+      ECRDockerImageName: ## Fill in
+      DockerImageName: shpl-bff

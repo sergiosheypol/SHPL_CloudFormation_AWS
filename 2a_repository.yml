@@ -1,0 +1,20 @@
+- import_playbook: vars.yml
+
+- name: shpl 
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+
+
+  #####################################################
+  # Create repository
+  #####################################################
+  - name: cloudformation ECS Repository
+    cloudformation: 
+      stack_name: SHPL-ECS-REPOSITORY
+      template: ./cloudformation/2a_repository.yaml
+      template_parameters:
+        RepositoryName: '{{ Project | lower }}-{{ Module | lower }}'
+        
+     

@@ -1,0 +1,53 @@
+##################################################
+# Creates Security Group
+# 0_securitygroup.yaml
+##################################################
+
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "SG Launch"
+
+##################################################
+# Parameters
+##################################################
+
+Parameters:
+  VpcId:
+    Description: Vpc Id
+    Type: String
+  
+  SGName:
+    Description: Company name
+    Type: String
+
+##################################################
+# Resources
+################################################## 
+
+Resources:
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for SHPL-BFF
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        -
+          IpProtocol: "tcp"
+          FromPort: "80"
+          ToPort: "80"
+          CidrIp: '0.0.0.0/0'
+        -
+          IpProtocol: "tcp"
+          FromPort: "443"
+          ToPort: "443"
+          CidrIp: '0.0.0.0/0'
+
+#############################################################################
+# OUTPUTS
+#############################################################################
+Outputs:
+
+  SHPLSG:
+    Description: 'SHPL Security Group'
+    Value: !Ref SecurityGroup
+    Export:
+      Name: !Ref SGName

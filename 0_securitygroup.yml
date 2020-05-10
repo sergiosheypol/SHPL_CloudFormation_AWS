@@ -1,0 +1,17 @@
+- import_playbook: vars.yml
+
+- name: shpl 
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+
+  - name: cloudformation security groups
+    vars:
+      UserArn: arn:aws:iam::415638077658:user/shpl
+    cloudformation: 
+      stack_name: SHPL-SG
+      template: ./cloudformation/0_securitygroup.yaml
+      template_parameters:
+        SGName: '{{ Project }}-{{ Module }}-SG'
+        VpcId: '{{ VpcId }}'

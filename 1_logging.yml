@@ -1,0 +1,21 @@
+- import_playbook: vars.yml
+
+- name: shpl 
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+
+  - name: cloudformation logs
+    vars:
+      UserArn: arn:aws:iam::415638077658:user/shpl
+    cloudformation: 
+      stack_name: SHPL-LOGS
+      template: ./cloudformation/1_logging.yaml
+      template_parameters:
+        S3BucketName: '{{ Project }}-{{ Module }}-{{ Env }}-BUCKET'
+        S3BucketNameLower: '{{ Project | lower }}-{{ Module | lower }}-{{ Env | lower }}-bucket'
+        UserArn: '{{UserArn}}'
+        LogGroupName: '{{ Project }}-{{ Module }}-{{ Env }}-LOGS'
+        LogsRetentionInDays: 1
+     

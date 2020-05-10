@@ -1,0 +1,28 @@
+- import_playbook: vars.yml
+
+- name: shpl 
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+
+
+  #####################################################
+  # Create Cluster
+  #####################################################
+  - name: cloudformation ELB
+    cloudformation: 
+      stack_name: SHPL-ECS-ELB
+      template: ./cloudformation/2b_loadbalancer.yaml
+      template_parameters:
+        ELBName: '{{ Project }}-{{ Module }}-ELB'
+        VpcId: '{{ VpcId }}'
+        SubnetId1: '{{ SubnetId1 }}'
+        SubnetId2: '{{ SubnetId2 }}'
+        TargetGroupName: '{{ Project }}-{{ Module }}-TG'
+        SecurityGroupName: '{{ Project }}-{{ Module }}-SG'
+        
+
+        
+        
+     

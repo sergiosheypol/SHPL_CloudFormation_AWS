@@ -1,0 +1,14 @@
+#!/usr/bin/env ansible-playbook
+
+- name: deploy infra
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+- import_playbook: 0_securitygroup.yml
+- import_playbook: 1_logging.yml
+- import_playbook: 2a_repository.yml
+- import_playbook: image_creation.yml
+- import_playbook: 2b_loadbalancer.yml
+- import_playbook: 2c_cluster.yml
+        

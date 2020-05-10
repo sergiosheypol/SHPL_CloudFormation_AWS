@@ -1,0 +1,95 @@
+##################################################
+# Creates ELB
+# 2b_loadbalancer.yaml
+##################################################
+
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "ELB launch"
+
+##################################################
+# Parameters
+##################################################
+
+Parameters: 
+
+  TargetGroupName:
+    Description: Name of the TargetGroup
+    Type: String
+
+  ELBName:
+    Description: Load Balancer Name
+    Type: String
+
+  VpcId:
+    Description: Vpc ID
+    Type: String
+
+  SubnetId1:
+    Type: AWS::EC2::Subnet::Id
+    Description: Choosen subnets Id 1
+
+  SubnetId2:
+    Type: AWS::EC2::Subnet::Id
+    Description: Choosen subnets Id 2
+
+  SecurityGroupName:
+    Description: Name of the SG to attach the tasks
+    Type: String
+  
+
+
+##################################################
+# Resources
+##################################################  
+
+Resources:
+  ELB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Ref ELBName
+      Scheme: internet-facing
+      SecurityGroups:
+        - Fn::ImportValue: !Ref SecurityGroupName
+      Subnets: 
+        - !Ref SubnetId1
+        - !Ref SubnetId2
+      LoadBalancerAttributes:
+        -
+          Key: "idle_timeout.timeout_seconds"
+          Value: "180"
+
+  ECSTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    DependsOn: ELB
+    Properties:
+      TargetType: ip
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      Name: !Ref TargetGroupName
+      Port: 80
+      Protocol: HTTP
+      UnhealthyThresholdCount: 2
+      VpcId: !Ref VpcId
+
+  ELBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn: !Ref ECSTargetGroup
+      LoadBalancerArn: !Ref ELB
+      Port: '80'
+      Protocol: HTTP
+
+##################################################
+# Output
+##################################################  
+Outputs:
+  TargetGroupArn:
+    Description: 'Target group ARN'
+    Value: !Ref ECSTargetGroup
+    Export:
+      Name: !Join ['-', [!Ref TargetGroupName, 'ARN']]

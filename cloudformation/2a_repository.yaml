@@ -1,0 +1,26 @@
+##################################################
+# Creates ECS Repository 
+# 2a_repository.yaml
+##################################################
+
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "ECS repository launch"
+
+##################################################
+# Parameters
+##################################################
+
+Parameters:
+  RepositoryName:
+    Description: 'Name of the repository'
+    Type: String
+
+##################################################
+# Resources
+##################################################  
+
+Resources:
+  ECSRepository:
+    Type: AWS::ECR::Repository
+    Properties: 
+      RepositoryName: !Ref RepositoryName

@@ -1,0 +1,33 @@
+- import_playbook: vars.yml
+
+- name: shpl 
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+
+
+  #####################################################
+  # Create Cluster
+  #####################################################
+  - name: cloudformation ECS cluster
+    cloudformation: 
+      stack_name: SHPL-ECS-CLUSTER
+      template: ./cloudformation/2c_cluster.yaml
+      template_parameters:
+        ClusterName: '{{ Project }}-{{ Module }}-{{ Env }}-CLUSTER'
+        NumberOfInstances: 2
+        ContainerName: '{{ Project }}-{{ Module }}-APP'
+        ContainerPort: 80
+        AppPort: 80
+        TargetGroupName: '{{ Project }}-{{ Module }}-TG-ARN'
+        SecurityGroupName: '{{ Project }}-{{ Module }}-SG'
+        SubnetId1: '{{ SubnetId1 }}'
+        SubnetId2: '{{ SubnetId2 }}'
+        ImageName: '{{ ECRDockerImageName }}'
+        ExecutionRoleArn: '{{ ECRIamExecutionRole }}'
+        
+
+        
+        
+     

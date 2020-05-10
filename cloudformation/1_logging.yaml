@@ -1,0 +1,100 @@
+##################################################
+# Creates CloudWatch logs 
+# 1_logging.yml
+##################################################
+
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "CloudWatch logs configuration"
+
+
+##################################################
+# Parameters
+##################################################
+
+Parameters:
+  S3BucketName:
+    Description: 'Name of the S3 Bucket for logs'
+    Type: String
+    Default: SHPL-BFF-PROD-BUCKET
+
+  S3BucketNameLower:
+    Description: 'Name of the S3 Bucket in lowercase'
+    Type: String
+    Default: shpl-bff-prod-bucket
+
+  UserArn:
+    Description: 'Arn of the allowed user'
+    Type: String
+    Default: arn:aws:iam::415638077658:user/shpl
+
+  LogGroupName:
+    Description: 'Name of the log group'
+    Type: String
+    Default: SHPL-BFF-PROD-LOGS
+
+  LogsRetentionInDays:
+    Description: 'Days to retain logs'
+    Type: Number
+    Default: 1
+    AllowedValues: [1, 2, 3, 4, 5, 6, 7]
+
+
+
+##################################################
+# Resources
+##################################################
+Resources: 
+
+  # Application login buckets
+  S3LoggingBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Ref S3BucketNameLower
+      Tags:
+        - Key: Name
+          Value: !Ref S3BucketName
+
+  # Log groups
+  AppLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Ref LogGroupName
+      RetentionInDays: !Ref LogsRetentionInDays
+
+##################################################
+# Policies
+##################################################
+
+  S3LoggingBucketPolicy:
+    DependsOn: S3LoggingBucket
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        !Ref S3LoggingBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Sid: LogsPolicy
+          Effect: Allow
+          Resource: !Join ['', ['arn:aws:s3:::', !Ref S3LoggingBucket, '/*']]
+          Principal:
+            AWS: !Ref UserArn
+          Action: 's3:PutObject'
+
+##################################################
+# Outputs
+##################################################
+Outputs:
+  
+  S3LoggingBucket:
+    Description: 'Logging bucket'
+    Value: !Ref S3LoggingBucket
+    Export:
+      Name: !Ref S3BucketName
+
+  AppLogGroup:
+    Description: 'Log group'
+    Value: !Ref AppLogGroup
+    Export:
+      Name: !Ref LogGroupName

@@ -1,0 +1,112 @@
+##################################################
+# Creates ECS cluster 
+# 2b_cluster.yaml
+##################################################
+
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "ECS cluster launch"
+
+##################################################
+# Parameters
+##################################################
+
+Parameters:
+  ClusterName:
+    Description: 'Name of the cluster'
+    Type: String
+  
+  NumberOfInstances:
+    Description: 'Desired number of instances'
+    Type: Number
+  
+  ContainerName:
+    Description: 'Name of the container'
+    Type: String
+
+  ContainerPort:
+    Description: 'Port to expose from the container'
+    Type: Number
+
+  AppPort:
+    Description: 'Port where the app listens'
+    Type: Number
+
+  TargetGroupName:
+    Description: Name of the target group to attach the cluster
+    Type: String
+
+  SecurityGroupName:
+    Description: Name of the SG to attach the tasks
+    Type: String
+
+  SubnetId1:
+    Type: AWS::EC2::Subnet::Id
+    Description: Choosen subnets Id 1
+
+  SubnetId2:
+    Type: AWS::EC2::Subnet::Id
+    Description: Choosen subnets Id 2
+
+  ImageName:
+    Description: Name of the Docker image 
+    Type: String
+
+  ExecutionRoleArn:
+    Description: IAM role of ExecutionRoleArn
+    Type: String
+
+
+##################################################
+# Resources
+##################################################  
+
+Resources:
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Ref ClusterName
+
+  ECSService:
+    Type: AWS::ECS::Service
+    DependsOn: ECSCluster
+    Properties:
+      Cluster: !Ref ClusterName
+      LaunchType: FARGATE
+      DesiredCount: !Ref NumberOfInstances
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups: 
+            - Fn::ImportValue: !Ref SecurityGroupName
+          Subnets:
+            - !Ref SubnetId1
+            - !Ref SubnetId2
+      LoadBalancers:
+      - ContainerName: !Ref ContainerName
+        ContainerPort: !Ref ContainerPort
+        TargetGroupArn: 
+          Fn::ImportValue: !Ref TargetGroupName
+      TaskDefinition: !Ref ECSTaskDefinition
+
+  ECSTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      RequiresCompatibilities: [FARGATE]
+      NetworkMode: awsvpc
+      Cpu: 1024
+      Memory: 2048
+      ExecutionRoleArn: !Ref ExecutionRoleArn
+      ContainerDefinitions:
+        -
+          Name: !Ref ContainerName
+          Image: !Ref ImageName
+          Cpu: 1024
+          Memory: 2048
+          PortMappings:
+            - 
+              ContainerPort: !Ref ContainerPort
+              HostPort: !Ref AppPort
+
+  
+
+  
